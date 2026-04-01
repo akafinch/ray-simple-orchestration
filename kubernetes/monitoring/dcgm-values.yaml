@@ -1,0 +1,25 @@
+# NVIDIA DCGM Exporter Helm values
+# Chart: nvidia/dcgm-exporter
+
+serviceMonitor:
+  enabled: true
+  namespace: monitoring
+  additionalLabels:
+    release: kube-prometheus-stack
+
+tolerations:
+  - key: nvidia.com/gpu
+    operator: Equal
+    value: "true"
+    effect: NoSchedule
+
+nodeSelector:
+  workload: inference
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "256Mi"

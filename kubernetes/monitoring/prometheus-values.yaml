@@ -1,0 +1,61 @@
+# kube-prometheus-stack Helm values
+# Chart: prometheus-community/kube-prometheus-stack
+
+grafana:
+  enabled: true
+  service:
+    type: LoadBalancer
+  adminPassword: "${GRAFANA_ADMIN_PASSWORD}"
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      searchNamespace: monitoring
+  grafana.ini:
+    security:
+      allow_embedding: true
+    auth.anonymous:
+      enabled: true
+      org_role: Viewer
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+
+    additionalScrapeConfigs:
+      # Ray head dashboard metrics (Ray Serve + cluster metrics)
+      - job_name: "ray-serve"
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: ["ray-system"]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_ray_io_node_type]
+            action: keep
+            regex: head
+          - source_labels: [__meta_kubernetes_pod_ip]
+            target_label: __address__
+            replacement: "${1}:8080"
+        metrics_path: "/metrics"
+
+      # FastAPI demo app metrics
+      - job_name: "demo-app"
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: ["default"]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            action: keep
+            regex: demo-app
+          - source_labels: [__meta_kubernetes_pod_ip]
+            target_label: __address__
+            replacement: "${1}:8080"
+        metrics_path: "/metrics"
+
+nodeExporter:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true

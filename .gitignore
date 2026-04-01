@@ -1,0 +1,38 @@
+# Terraform
+terraform.tfvars
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# Kubeconfig
+kubeconfig*
+~/.kube/clip-clap-inference
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# Node / Frontend
+node_modules/
+app/frontend/build/
+app/frontend/.svelte-kit/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.pem
+*.key
+.env
+
+# Claude
+CLAUDE.md
+.claude/

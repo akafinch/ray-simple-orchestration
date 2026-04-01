@@ -1,0 +1,171 @@
+apiVersion: ray.io/v1
+kind: RayService
+metadata:
+  name: clip-clap
+  namespace: ray-system
+spec:
+  # Exclude head from serve traffic — head has no GPU and no model weights
+  excludeHeadPodFromServeSvc: true
+
+  # Safe rolling upgrade: spin up new cluster, verify health, switch traffic, tear down old
+  upgradeStrategy:
+    type: NewCluster
+
+  serveConfigV2: |
+    proxy_location: EveryNode
+    http_options:
+      host: 0.0.0.0
+      port: 8000
+      request_timeout_s: 120
+
+    applications:
+      - name: clip
+        import_path: clip_deployment:app
+        route_prefix: /clip
+        deployments:
+          - name: CLIPEmbedder
+            num_replicas: 2
+            max_replicas_per_node: 1
+            max_ongoing_requests: 10
+            graceful_shutdown_timeout_s: 30
+            health_check_period_s: 15
+            health_check_timeout_s: 30
+            ray_actor_options:
+              num_gpus: 1
+              num_cpus: 1
+
+      - name: clap
+        import_path: clap_deployment:app
+        route_prefix: /clap
+        deployments:
+          - name: CLAPEmbedder
+            num_replicas: 1
+            max_replicas_per_node: 1
+            max_ongoing_requests: 10
+            graceful_shutdown_timeout_s: 30
+            health_check_period_s: 15
+            health_check_timeout_s: 30
+            ray_actor_options:
+              num_gpus: 1
+              num_cpus: 1
+
+  rayClusterConfig:
+    rayVersion: "2.54.0"
+
+    headGroupSpec:
+      rayStartParams:
+        num-cpus: "0"
+        dashboard-host: "0.0.0.0"
+      template:
+        spec:
+          nodeSelector:
+            workload: system
+          containers:
+            - name: ray-head
+              # Head uses the same custom image so serve controller can resolve imports,
+              # but runs no GPU workloads (num-cpus: 0, no GPU request)
+              image: morduun/clip-clap-worker:latest
+              ports:
+                - containerPort: 6379
+                  name: gcs-server
+                - containerPort: 8265
+                  name: dashboard
+                - containerPort: 8000
+                  name: serve
+              resources:
+                requests:
+                  cpu: "2"
+                  memory: "4Gi"
+                limits:
+                  cpu: "4"
+                  memory: "8Gi"
+              env:
+                - name: MODEL_CACHE_PATH
+                  value: /model-cache
+              volumeMounts:
+                - name: model-cache
+                  mountPath: /model-cache
+          # Head doesn't need model weights — empty dir is fine for import resolution
+          volumes:
+            - name: model-cache
+              emptyDir: {}
+
+    workerGroupSpecs:
+      - groupName: gpu-workers
+        replicas: 3
+        minReplicas: 1
+        maxReplicas: 3
+        rayStartParams:
+          num-gpus: "1"
+        template:
+          spec:
+            nodeSelector:
+              workload: inference
+            tolerations:
+              - key: nvidia.com/gpu
+                operator: Equal
+                value: "true"
+                effect: NoSchedule
+            initContainers:
+              - name: model-puller
+                image: amazon/aws-cli:2.27.31
+                command: ["/bin/sh", "-c"]
+                args:
+                  - |
+                    echo "Pulling CLIP model weights..."
+                    aws s3 sync s3://${MODEL_BUCKET}/clip/ /model-cache/clip/ \
+                      --endpoint-url ${OBJ_ENDPOINT} --no-progress
+                    echo "Pulling CLAP model weights..."
+                    aws s3 sync s3://${MODEL_BUCKET}/clap/ /model-cache/clap/ \
+                      --endpoint-url ${OBJ_ENDPOINT} --no-progress
+                    echo "Model pull complete."
+                env:
+                  - name: AWS_ACCESS_KEY_ID
+                    valueFrom:
+                      secretKeyRef:
+                        name: obj-storage-reader
+                        key: access-key
+                  - name: AWS_SECRET_ACCESS_KEY
+                    valueFrom:
+                      secretKeyRef:
+                        name: obj-storage-reader
+                        key: secret-key
+                  - name: OBJ_ENDPOINT
+                    valueFrom:
+                      configMapKeyRef:
+                        name: inference-config
+                        key: obj-endpoint
+                  - name: MODEL_BUCKET
+                    valueFrom:
+                      configMapKeyRef:
+                        name: inference-config
+                        key: model-bucket
+                volumeMounts:
+                  - name: model-cache
+                    mountPath: /model-cache
+            containers:
+              - name: ray-worker
+                image: morduun/clip-clap-worker:latest
+                lifecycle:
+                  preStop:
+                    exec:
+                      command: ["/bin/sh", "-c", "ray stop"]
+                resources:
+                  requests:
+                    cpu: "2"
+                    memory: "12Gi"
+                    nvidia.com/gpu: "1"
+                  limits:
+                    cpu: "4"
+                    memory: "14Gi"
+                    nvidia.com/gpu: "1"
+                env:
+                  - name: MODEL_CACHE_PATH
+                    value: /model-cache
+                volumeMounts:
+                  - name: model-cache
+                    mountPath: /model-cache
+            volumes:
+              - name: model-cache
+                emptyDir:
+                  sizeLimit: 10Gi
