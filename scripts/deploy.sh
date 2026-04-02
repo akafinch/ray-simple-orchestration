@@ -66,7 +66,7 @@ kubectl -n ray-system wait --for=condition=Ready pod -l ray.io/serve=clip-clap -
 # ---- Phase 7: Monitoring ----
 echo "==> Phase 7: Monitoring stack"
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts 2>/dev/null || true
-helm repo add nvidia https://helm.ngc.nvidia.com/nvidia 2>/dev/null || true
+helm repo add dcgm-exporter https://nvidia.github.io/dcgm-exporter/helm-charts 2>/dev/null || true
 helm repo update
 
 helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
@@ -75,7 +75,7 @@ helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheu
   -f "$ROOT_DIR/kubernetes/monitoring/prometheus-values.yaml" \
   --wait --timeout 5m
 
-helm upgrade --install dcgm-exporter nvidia/dcgm-exporter \
+helm upgrade --install dcgm-exporter dcgm-exporter/dcgm-exporter \
   --namespace monitoring \
   -f "$ROOT_DIR/kubernetes/monitoring/dcgm-values.yaml" \
   --wait --timeout 3m
