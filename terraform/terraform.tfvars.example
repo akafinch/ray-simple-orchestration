@@ -3,16 +3,16 @@
 
 linode_token = "your-linode-api-token-here"
 
+# Required — set these for your deployment:
+region             = "us-ord"
+obj_storage_region = "us-ord-1"
+operator_ips       = ["203.0.113.0/32"]
+
 # Optional overrides (defaults shown):
-# region             = "us-ord"
 # cluster_label      = "clip-clap-inference"
 # k8s_version        = "1.35"
 # cpu_node_type      = "g6-standard-4"
 # cpu_node_count     = 2
 # gpu_node_type      = "g2-gpu-rtx4000a1-s"
 # gpu_node_count     = 3
-# obj_storage_region = "us-ord-1"
 # model_bucket_label = "clip-clap-weights"
-
-# CIDR blocks for operator access (K8s API, Grafana)
-# operator_ips = ["203.0.113.0/32"]

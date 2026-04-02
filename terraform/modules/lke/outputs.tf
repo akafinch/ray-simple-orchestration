@@ -7,6 +7,7 @@ output "kubeconfig" {
 output "kubeconfig_host" {
   description = "Kubernetes API server host"
   value       = yamldecode(base64decode(linode_lke_cluster.this.kubeconfig)).clusters[0].cluster.server
+  sensitive   = true
 }
 
 output "kubeconfig_token" {
@@ -18,6 +19,7 @@ output "kubeconfig_token" {
 output "kubeconfig_ca" {
   description = "Base64-encoded cluster CA certificate"
   value       = yamldecode(base64decode(linode_lke_cluster.this.kubeconfig)).clusters[0].cluster.certificate-authority-data
+  sensitive   = true
 }
 
 output "cluster_id" {

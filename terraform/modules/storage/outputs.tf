@@ -5,7 +5,7 @@ output "bucket_name" {
 
 output "endpoint" {
   description = "S3-compatible endpoint URL"
-  value       = "https://${var.obj_storage_region}.linodeobjects.com"
+  value       = "https://${linode_object_storage_bucket.model_weights.s3_endpoint}"
 }
 
 output "reader_access_key" {

@@ -33,6 +33,10 @@ Thumbs.db
 *.key
 .env
 
+# Generated artifacts
+*.pptx
+scripts/build-deck.py
+
 # Claude
 CLAUDE.md
 .claude/

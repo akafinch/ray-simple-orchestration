@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Full stack deploy: Terraform → Helm → kubectl
+# Deploy Kubernetes resources onto an already-provisioned LKE cluster.
+# Prerequisite: terraform apply must have completed successfully.
 # Usage: ./scripts/deploy.sh
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$SCRIPT_DIR/.."
 TF_DIR="$ROOT_DIR/terraform"
 
-# ---- Phase 1: Terraform ----
-echo "==> Phase 1: Terraform apply"
+# ---- Phase 1: Read Terraform outputs ----
+echo "==> Phase 1: Reading Terraform outputs"
 cd "$TF_DIR"
-terraform init
-terraform apply -auto-approve
 
 # Extract outputs
 OBJ_READER_KEY=$(terraform output -raw obj_reader_key)
@@ -40,7 +39,13 @@ kubectl create secret generic obj-storage-reader \
   --from-literal=secret-key="$OBJ_READER_SECRET" \
   --namespace ray-system --dry-run=client -o yaml | kubectl apply -f -
 
-kubectl apply -f "$ROOT_DIR/kubernetes/demo-app/configmap.yaml"
+for NS in ray-system default; do
+  kubectl create configmap inference-config \
+    --from-literal=ray-serve-url="http://clip-clap-serve-svc.ray-system:8000" \
+    --from-literal=obj-endpoint="$OBJ_ENDPOINT" \
+    --from-literal=model-bucket="$MODEL_BUCKET" \
+    --namespace "$NS" --dry-run=client -o yaml | kubectl apply -f -
+done
 
 # ---- Phase 5: KubeRay Operator ----
 echo "==> Phase 5: KubeRay operator"
@@ -55,7 +60,7 @@ helm upgrade --install kuberay-operator kuberay/kuberay-operator \
 echo "==> Phase 6: RayService (CLIP + CLAP)"
 kubectl apply -f "$ROOT_DIR/kubernetes/kuberay/rayservice-clip-clap.yaml"
 echo "    Waiting for RayService pods..."
-kubectl -n ray-system wait --for=condition=Ready pod -l ray.io/cluster --timeout=10m || \
+kubectl -n ray-system wait --for=condition=Ready pod -l ray.io/serve=clip-clap --timeout=10m || \
   echo "    WARNING: Timeout waiting for Ray pods — check 'kubectl -n ray-system get pods'"
 
 # ---- Phase 7: Monitoring ----
@@ -98,6 +103,6 @@ echo ""
 echo "External services:"
 kubectl get svc --all-namespaces -o wide | grep LoadBalancer
 echo ""
-echo "Grafana admin password: (run 'terraform -chdir=terraform output grafana_admin_password')"
+echo "Grafana admin password: (run 'terraform -chdir=$TF_DIR output grafana_admin_password')"
 echo "Ray dashboard: kubectl -n ray-system port-forward svc/clip-clap-head-svc 8265:8265"
 echo ""

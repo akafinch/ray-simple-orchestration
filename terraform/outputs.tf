@@ -7,6 +7,7 @@ output "kubeconfig" {
 output "kubeconfig_host" {
   description = "Kubernetes API server endpoint"
   value       = module.lke.kubeconfig_host
+  sensitive   = true
 }
 
 output "cluster_id" {
