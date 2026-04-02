@@ -39,5 +39,5 @@ async def config() -> dict:
     """Expose non-sensitive runtime config for the frontend."""
     return {
         "ray_serve_url": RAY_SERVE_URL,
-        "grafana_url": os.environ.get("GRAFANA_URL", ""),
+        "grafana_url": "/grafana",
     }

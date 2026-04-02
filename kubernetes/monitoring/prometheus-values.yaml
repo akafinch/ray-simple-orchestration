@@ -4,7 +4,7 @@
 grafana:
   enabled: true
   service:
-    type: LoadBalancer
+    type: ClusterIP
   adminPassword: "${GRAFANA_ADMIN_PASSWORD}"
   sidecar:
     dashboards:
@@ -12,6 +12,9 @@ grafana:
       label: grafana_dashboard
       searchNamespace: monitoring
   grafana.ini:
+    server:
+      root_url: "%(protocol)s://%(domain)s/grafana/"
+      serve_from_sub_path: true
     security:
       allow_embedding: true
     auth.anonymous:
