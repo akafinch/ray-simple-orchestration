@@ -1,25 +1,10 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: inference-config
-  namespace: ray-system
-data:
-  # Ray Serve base URL — the RayService-managed serve service
-  # CLIP endpoint: {ray-serve-url}/clip
-  # CLAP endpoint: {ray-serve-url}/clap
-  ray-serve-url: "http://clip-clap-serve-svc.ray-system:8000"
-  # Linode Object Storage S3-compatible endpoint
-  obj-endpoint: "https://us-ord-1.linodeobjects.com"
-  # Model bucket name
-  model-bucket: "clip-clap-weights"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: inference-config
-  namespace: default
-data:
-  # Duplicated into default namespace for the demo app pods
-  ray-serve-url: "http://clip-clap-serve-svc.ray-system:8000"
-  obj-endpoint: "https://us-ord-1.linodeobjects.com"
-  model-bucket: "clip-clap-weights"
+# REFERENCE ONLY — this file is not applied directly.
+# The deploy script generates the ConfigMap dynamically from Terraform outputs:
+#
+#   kubectl create configmap inference-config \
+#     --from-literal=ray-serve-url="http://clip-clap-serve-svc.ray-system:8000" \
+#     --from-literal=obj-endpoint="<from terraform output obj_endpoint>" \
+#     --from-literal=model-bucket="<from terraform output model_bucket>"
+#
+# This ensures the OBJ endpoint always matches the actual storage region
+# without hardcoding. See scripts/deploy.sh Phase 4.

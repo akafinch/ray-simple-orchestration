@@ -64,7 +64,7 @@ spec:
             - name: ray-head
               # Head uses the same custom image so serve controller can resolve imports,
               # but runs no GPU workloads (num-cpus: 0, no GPU request)
-              image: morduun/clip-clap-worker:latest
+              image: WORKER_IMAGE_PLACEHOLDER
               ports:
                 - containerPort: 6379
                   name: gcs-server
@@ -145,7 +145,7 @@ spec:
                     mountPath: /model-cache
             containers:
               - name: ray-worker
-                image: morduun/clip-clap-worker:latest
+                image: WORKER_IMAGE_PLACEHOLDER
                 lifecycle:
                   preStop:
                     exec:

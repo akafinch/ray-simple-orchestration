@@ -23,7 +23,7 @@ spec:
         workload: system
       containers:
         - name: demo-app
-          image: morduun/clip-clap-demo:latest
+          image: DEMO_IMAGE_PLACEHOLDER
           ports:
             - containerPort: 8080
               name: http
