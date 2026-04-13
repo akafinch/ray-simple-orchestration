@@ -4,9 +4,18 @@
 linode_token = "your-linode-api-token-here"
 
 # Required — set these for your deployment:
-region             = "us-ord"
-obj_storage_region = "us-ord-1"
-operator_ips       = ["203.0.113.0/32"]
+region             = "in-bom-2"
+obj_storage_region = "in-maa-1"
+allowed_ips        = [
+  "24.115.103.113/32",
+  "70.170.50.50/32",
+  "170.203.114.78/32",
+  "193.43.135.45/32",
+  "172.238.57.42/32"
+]
+
+# LKE tier: "enterprise" (VPC-only, auto-firewall) or "standard"
+# lke_tier           = "enterprise"
 
 # Optional overrides (defaults shown):
 # cluster_label      = "clip-clap-inference"

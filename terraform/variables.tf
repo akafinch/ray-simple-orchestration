@@ -22,6 +22,12 @@ variable "k8s_version" {
   default     = "1.35"
 }
 
+variable "lke_tier" {
+  description = "LKE tier: 'standard' or 'enterprise'"
+  type        = string
+  default     = "enterprise"
+}
+
 variable "cpu_node_type" {
   description = "Linode instance type for CPU node pool"
   type        = string
@@ -58,8 +64,7 @@ variable "model_bucket_label" {
   default     = "clip-clap-weights"
 }
 
-variable "operator_ips" {
-  description = "CIDR blocks allowed to access K8s API and Grafana"
+variable "allowed_ips" {
+  description = "CIDR blocks allowed to access the demo app via NodeBalancer"
   type        = list(string)
-  default     = []
 }

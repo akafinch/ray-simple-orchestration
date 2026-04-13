@@ -13,6 +13,12 @@ variable "k8s_version" {
   type        = string
 }
 
+variable "tier" {
+  description = "LKE tier: 'standard' or 'enterprise'"
+  type        = string
+  default     = "enterprise"
+}
+
 variable "cpu_node_type" {
   description = "Linode type for CPU nodes"
   type        = string
@@ -33,17 +39,7 @@ variable "gpu_node_count" {
   type        = number
 }
 
-variable "vpc_id" {
-  description = "VPC ID to attach the cluster to"
-  type        = string
-}
-
-variable "subnet_id" {
-  description = "VPC subnet ID for the cluster"
-  type        = string
-}
-
-variable "firewall_id" {
-  description = "Cloud Firewall ID for node pools"
-  type        = string
+variable "control_plane_acl_ips" {
+  description = "CIDR blocks allowed to reach the Kubernetes API control plane"
+  type        = list(string)
 }

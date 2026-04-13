@@ -2,15 +2,21 @@ resource "linode_lke_cluster" "this" {
   label       = var.cluster_label
   k8s_version = var.k8s_version
   region      = var.region
+  tier        = var.tier
 
-  vpc_id    = var.vpc_id
-  subnet_id = var.subnet_id
+  control_plane {
+    acl {
+      enabled = true
+      addresses {
+        ipv4 = var.control_plane_acl_ips
+      }
+    }
+  }
 
   # CPU pool — Ray head, Prometheus, Grafana, demo app
   pool {
-    type        = var.cpu_node_type
-    count       = var.cpu_node_count
-    firewall_id = var.firewall_id
+    type  = var.cpu_node_type
+    count = var.cpu_node_count
 
     labels = {
       "workload" = "system"
@@ -19,9 +25,8 @@ resource "linode_lke_cluster" "this" {
 
   # GPU pool — Ray workers (CLIP/CLAP inference)
   pool {
-    type        = var.gpu_node_type
-    count       = var.gpu_node_count
-    firewall_id = var.firewall_id
+    type  = var.gpu_node_type
+    count = var.gpu_node_count
 
     labels = {
       "workload"       = "inference"

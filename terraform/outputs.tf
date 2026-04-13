@@ -4,12 +4,6 @@ output "kubeconfig" {
   sensitive   = true
 }
 
-output "kubeconfig_host" {
-  description = "Kubernetes API server endpoint"
-  value       = module.lke.kubeconfig_host
-  sensitive   = true
-}
-
 output "cluster_id" {
   description = "LKE cluster ID"
   value       = module.lke.cluster_id
@@ -53,4 +47,9 @@ output "grafana_admin_password" {
   description = "Generated Grafana admin password"
   value       = random_password.grafana_admin.result
   sensitive   = true
+}
+
+output "nodebalancer_firewall_id" {
+  description = "Cloud Firewall ID to attach to the NodeBalancer"
+  value       = linode_firewall.nodebalancer.id
 }

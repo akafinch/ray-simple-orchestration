@@ -32,6 +32,7 @@ OBJ_READER_SECRET=$(terraform output -raw obj_reader_secret)
 OBJ_ENDPOINT=$(terraform output -raw obj_endpoint)
 MODEL_BUCKET=$(terraform output -raw model_bucket)
 GRAFANA_PASSWORD=$(terraform output -raw grafana_admin_password)
+NB_FIREWALL_ID=$(terraform output -raw nodebalancer_firewall_id)
 
 # ---- Phase 2: Kubeconfig ----
 echo "==> Phase 2: Kubeconfig"
@@ -115,6 +116,23 @@ sed "s|DEMO_IMAGE_PLACEHOLDER|$DEMO_IMAGE|g" \
   "$ROOT_DIR/kubernetes/demo-app/deployment.yaml" | kubectl apply -f -
 kubectl apply -f "$ROOT_DIR/kubernetes/demo-app/service.yaml"
 kubectl rollout status deployment/demo-app --timeout=3m
+
+# ---- Phase 10: NodeBalancer Firewall ----
+echo "==> Phase 10: Attaching firewall to NodeBalancer"
+echo "    Waiting for NodeBalancer to be provisioned..."
+for i in $(seq 1 30); do
+  NB_ID=$(linode-cli nodebalancers list --json | jq -r '.[0].id // empty')
+  if [ -n "$NB_ID" ]; then break; fi
+  sleep 5
+done
+
+if [ -n "$NB_ID" ]; then
+  linode-cli firewalls device-create "$NB_FIREWALL_ID" \
+    --id "$NB_ID" --type nodebalancer
+  echo "    Firewall $NB_FIREWALL_ID attached to NodeBalancer $NB_ID"
+else
+  echo "    WARNING: NodeBalancer not found — attach firewall manually"
+fi
 
 # ---- Summary ----
 echo ""
