@@ -3,7 +3,6 @@ module "lke" {
 
   region                = var.region
   cluster_label         = var.cluster_label
-  k8s_version           = var.k8s_version
   tier                  = var.lke_tier
   cpu_node_type         = var.cpu_node_type
   cpu_node_count        = var.cpu_node_count
