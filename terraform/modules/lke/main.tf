@@ -1,4 +1,6 @@
-data "linode_lke_versions" "available" {}
+data "linode_lke_versions" "available" {
+  tier = var.tier
+}
 
 locals {
   k8s_version = coalesce(var.k8s_version, data.linode_lke_versions.available.versions[0].id)
