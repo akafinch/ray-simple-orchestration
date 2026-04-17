@@ -19,8 +19,8 @@ spec:
       request_timeout_s: 120
 
     applications:
-      - name: clip
-        import_path: clip_deployment:app
+      - name: clip-embed
+        import_path: clip_deployment:embedder_app
         route_prefix: /clip
         deployments:
           - name: CLIPEmbedder
@@ -34,11 +34,41 @@ spec:
               num_gpus: 1
               num_cpus: 1
 
-      - name: clap
-        import_path: clap_deployment:app
+      - name: clip-classify
+        import_path: clip_deployment:classifier_app
+        route_prefix: /clip-classify
+        deployments:
+          - name: CLIPClassifier
+            num_replicas: 2
+            max_replicas_per_node: 1
+            max_ongoing_requests: 10
+            graceful_shutdown_timeout_s: 30
+            health_check_period_s: 15
+            health_check_timeout_s: 30
+            ray_actor_options:
+              num_gpus: 1
+              num_cpus: 1
+
+      - name: clap-embed
+        import_path: clap_deployment:embedder_app
         route_prefix: /clap
         deployments:
           - name: CLAPEmbedder
+            num_replicas: 1
+            max_replicas_per_node: 1
+            max_ongoing_requests: 10
+            graceful_shutdown_timeout_s: 30
+            health_check_period_s: 15
+            health_check_timeout_s: 30
+            ray_actor_options:
+              num_gpus: 1
+              num_cpus: 1
+
+      - name: clap-classify
+        import_path: clap_deployment:classifier_app
+        route_prefix: /clap-classify
+        deployments:
+          - name: CLAPClassifier
             num_replicas: 1
             max_replicas_per_node: 1
             max_ongoing_requests: 10

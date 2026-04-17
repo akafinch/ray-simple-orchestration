@@ -1,4 +1,4 @@
-"""Embedding and similarity routes — proxies to Ray Serve CLIP/CLAP deployments."""
+"""Embedding, classification, and similarity routes — proxies to Ray Serve CLIP/CLAP deployments."""
 
 import base64
 import os
@@ -7,7 +7,7 @@ from typing import Any
 
 import httpx
 import numpy as np
-from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -23,6 +23,10 @@ class TextRequest(BaseModel):
 class SimilarityRequest(BaseModel):
     a: list[float]
     b: list[float]
+
+
+class ClassifyRequest(BaseModel):
+    labels: list[str]
 
 
 async def _call_ray(endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -88,3 +92,39 @@ async def similarity(req: SimilarityRequest) -> dict[str, float]:
 
     score = float(np.dot(a, b) / (norm_a * norm_b))
     return {"score": score}
+
+
+@router.post("/classify/image")
+async def classify_image(file: UploadFile, labels: str = Form(...)) -> dict[str, Any]:
+    """Zero-shot image classification via CLIP. Labels are comma-separated."""
+    contents = await file.read()
+    if len(contents) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Image must be under 10MB")
+
+    label_list = [l.strip() for l in labels.split(",") if l.strip()]
+    if len(label_list) < 2:
+        raise HTTPException(status_code=400, detail="Provide at least 2 comma-separated labels")
+
+    image_b64 = base64.b64encode(contents).decode("utf-8")
+    start = time.perf_counter()
+    result = await _call_ray("/clip-classify", {"image_b64": image_b64, "labels": label_list})
+    result["latency_ms"] = round((time.perf_counter() - start) * 1000, 1)
+    return result
+
+
+@router.post("/classify/audio")
+async def classify_audio(file: UploadFile, labels: str = Form(...)) -> dict[str, Any]:
+    """Zero-shot audio classification via CLAP. Labels are comma-separated."""
+    contents = await file.read()
+    if len(contents) > 50 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Audio must be under 50MB")
+
+    label_list = [l.strip() for l in labels.split(",") if l.strip()]
+    if len(label_list) < 2:
+        raise HTTPException(status_code=400, detail="Provide at least 2 comma-separated labels")
+
+    audio_b64 = base64.b64encode(contents).decode("utf-8")
+    start = time.perf_counter()
+    result = await _call_ray("/clap-classify", {"audio_b64": audio_b64, "labels": label_list})
+    result["latency_ms"] = round((time.perf_counter() - start) * 1000, 1)
+    return result

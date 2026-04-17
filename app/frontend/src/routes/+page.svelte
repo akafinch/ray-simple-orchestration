@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.css';
+	import ClassifyDemo from '$lib/ClassifyDemo.svelte';
 	import EmbedInput from '$lib/EmbedInput.svelte';
 	import EmbedVisualizer from '$lib/EmbedVisualizer.svelte';
 	import SimilarityDemo from '$lib/SimilarityDemo.svelte';
@@ -12,6 +13,7 @@
 	let currentLatency = 0;
 	let currentDim = 0;
 	let errorMsg = '';
+	let showAdvanced = false;
 
 	function handleResult(e: CustomEvent<EmbedResponse>) {
 		const r = e.detail;
@@ -38,38 +40,18 @@
 	<section class="section hero">
 		<div class="container">
 			<p class="label">Akamai AI Center of Excellence</p>
-			<h1>Multimodal Embedding<br /><span class="accent">Inference Network</span></h1>
+			<h1>Multimodal AI<br /><span class="accent">Inference Network</span></h1>
 			<p class="subtitle">
-				CLIP + CLAP models served on GPU via Ray Serve on Akamai LKE.
-				Submit text, images, or audio — get embeddings in real time.
+				CLIP + CLAP models on GPU via Ray Serve on Akamai LKE.
+				Zero-shot classification for images and audio — no training required.
 			</p>
 		</div>
 	</section>
 
-	<!-- Embed Section -->
+	<!-- Classification Section (main demo) -->
 	<section class="section">
 		<div class="container">
-			<div class="embed-grid">
-				<div>
-					<EmbedInput on:result={handleResult} on:error={handleError} />
-					{#if errorMsg}
-						<p class="error-banner mono">{errorMsg}</p>
-					{/if}
-				</div>
-				<EmbedVisualizer
-					embedding={currentEmbedding}
-					label={currentLabel}
-					latency={currentLatency}
-					dim={currentDim}
-				/>
-			</div>
-		</div>
-	</section>
-
-	<!-- Similarity Section -->
-	<section class="section">
-		<div class="container">
-			<SimilarityDemo />
+			<ClassifyDemo />
 		</div>
 	</section>
 
@@ -81,9 +63,41 @@
 	</section>
 
 	<!-- Architecture Section -->
-	<section class="section" style="border-bottom: none;">
+	<section class="section">
 		<div class="container">
 			<ArchDiagram />
+		</div>
+	</section>
+
+	<!-- Advanced Section (collapsed by default) -->
+	<section class="section" style="border-bottom: none;">
+		<div class="container">
+			<button class="advanced-toggle" on:click={() => showAdvanced = !showAdvanced}>
+				{showAdvanced ? '▼' : '▶'} Advanced: Raw Embeddings & Similarity
+			</button>
+
+			{#if showAdvanced}
+				<div class="advanced-content">
+					<div class="embed-grid">
+						<div>
+							<EmbedInput on:result={handleResult} on:error={handleError} />
+							{#if errorMsg}
+								<p class="error-banner mono">{errorMsg}</p>
+							{/if}
+						</div>
+						<EmbedVisualizer
+							embedding={currentEmbedding}
+							label={currentLabel}
+							latency={currentLatency}
+							dim={currentDim}
+						/>
+					</div>
+
+					<div style="margin-top: 2rem;">
+						<SimilarityDemo />
+					</div>
+				</div>
+			{/if}
 		</div>
 	</section>
 </main>
@@ -129,6 +143,34 @@
 		border-radius: var(--radius);
 		color: #f05050;
 		font-size: 0.75rem;
+	}
+
+	.advanced-toggle {
+		background: none;
+		border: 1px solid var(--border-subtle);
+		color: var(--text-secondary);
+		padding: 0.75rem 1rem;
+		font-size: 0.875rem;
+		cursor: pointer;
+		width: 100%;
+		text-align: left;
+		border-radius: var(--radius);
+		transition: all 150ms ease;
+	}
+
+	.advanced-toggle:hover {
+		background: var(--bg-elevated);
+		color: var(--text-primary);
+	}
+
+	.advanced-content {
+		margin-top: 1.5rem;
+		animation: fade-in 300ms ease;
+	}
+
+	@keyframes fade-in {
+		from { opacity: 0; transform: translateY(8px); }
+		to { opacity: 1; transform: translateY(0); }
 	}
 
 	@media (max-width: 768px) {
