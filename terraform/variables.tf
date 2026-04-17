@@ -19,7 +19,7 @@ variable "cluster_label" {
 variable "k8s_version" {
   description = "Kubernetes version for LKE (pinned, not latest)"
   type        = string
-  default     = "1.35"
+  default     = "1.32"
 }
 
 variable "lke_tier" {

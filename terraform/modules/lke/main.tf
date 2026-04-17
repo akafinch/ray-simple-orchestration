@@ -5,6 +5,8 @@ resource "linode_lke_cluster" "this" {
   tier        = var.tier
 
   control_plane {
+    high_availability = true  # Required for LKE Enterprise
+
     acl {
       enabled = true
       addresses {

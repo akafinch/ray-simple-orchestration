@@ -30,7 +30,7 @@ control_plane_acl_ips = [
 
 # Optional overrides (defaults shown):
 # cluster_label      = "clip-clap-inference"
-# k8s_version        = "1.35"
+# k8s_version        = "1.32"
 # cpu_node_type      = "g6-standard-4"
 # cpu_node_count     = 2
 # gpu_node_type      = "g2-gpu-rtx4000a1-s"
