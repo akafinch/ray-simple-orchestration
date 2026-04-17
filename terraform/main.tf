@@ -1,14 +1,15 @@
 module "lke" {
   source = "./modules/lke"
 
-  region         = var.region
-  cluster_label  = var.cluster_label
-  k8s_version    = var.k8s_version
-  tier           = var.lke_tier
-  cpu_node_type  = var.cpu_node_type
-  cpu_node_count = var.cpu_node_count
-  gpu_node_type  = var.gpu_node_type
-  gpu_node_count = var.gpu_node_count
+  region                = var.region
+  cluster_label         = var.cluster_label
+  k8s_version           = var.k8s_version
+  tier                  = var.lke_tier
+  cpu_node_type         = var.cpu_node_type
+  cpu_node_count        = var.cpu_node_count
+  gpu_node_type         = var.gpu_node_type
+  gpu_node_count        = var.gpu_node_count
+  control_plane_acl_ips = var.control_plane_acl_ips
 }
 
 module "storage" {

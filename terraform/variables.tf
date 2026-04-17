@@ -68,3 +68,8 @@ variable "allowed_ips" {
   description = "CIDR blocks allowed to access the demo app via NodeBalancer"
   type        = list(string)
 }
+
+variable "control_plane_acl_ips" {
+  description = "CIDR blocks allowed to reach the Kubernetes API control plane"
+  type        = list(string)
+}

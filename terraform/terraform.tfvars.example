@@ -6,7 +6,18 @@ linode_token = "your-linode-api-token-here"
 # Required — set these for your deployment:
 region             = "in-bom-2"
 obj_storage_region = "in-maa-1"
+
+# Demo app access — NodeBalancer firewall
 allowed_ips        = [
+  "24.115.103.113/32",
+  "70.170.50.50/32",
+  "170.203.114.78/32",
+  "193.43.135.45/32",
+  "172.238.57.42/32"
+]
+
+# Kubernetes API access — LKE-E Control Plane ACL (kubectl operators only)
+control_plane_acl_ips = [
   "24.115.103.113/32",
   "70.170.50.50/32",
   "170.203.114.78/32",
