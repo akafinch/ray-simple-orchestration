@@ -1,6 +1,12 @@
+data "linode_lke_versions" "available" {}
+
+locals {
+  k8s_version = coalesce(var.k8s_version, data.linode_lke_versions.available.versions[0].id)
+}
+
 resource "linode_lke_cluster" "this" {
   label       = var.cluster_label
-  k8s_version = var.k8s_version
+  k8s_version = local.k8s_version
   region      = var.region
   tier        = var.tier
 

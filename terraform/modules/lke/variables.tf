@@ -9,7 +9,7 @@ variable "cluster_label" {
 }
 
 variable "k8s_version" {
-  description = "Kubernetes version (omit to use LKE default)"
+  description = "Kubernetes version (omit to auto-select latest available)"
   type        = string
   default     = null
 }

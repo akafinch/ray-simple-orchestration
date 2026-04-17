@@ -28,9 +28,9 @@ control_plane_acl_ips = [
 # LKE tier: "enterprise" (VPC-only, auto-firewall) or "standard"
 # lke_tier           = "enterprise"
 
-# Optional overrides (defaults shown):
+# Optional overrides:
 # cluster_label      = "clip-clap-inference"
-# k8s_version        = "1.32"
+# k8s_version        = "1.32"  # omit to auto-select latest available
 # cpu_node_type      = "g6-standard-4"
 # cpu_node_count     = 2
 # gpu_node_type      = "g2-gpu-rtx4000a1-s"
