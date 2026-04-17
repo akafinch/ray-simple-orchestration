@@ -41,6 +41,7 @@ variable "gpu_node_count" {
 }
 
 variable "control_plane_acl_ips" {
-  description = "CIDR blocks allowed to reach the Kubernetes API control plane"
+  description = "CIDR blocks allowed to reach the Kubernetes API control plane (enterprise only)"
   type        = list(string)
+  default     = []
 }

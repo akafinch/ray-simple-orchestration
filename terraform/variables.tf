@@ -25,7 +25,7 @@ variable "k8s_version" {
 variable "lke_tier" {
   description = "LKE tier: 'standard' or 'enterprise'"
   type        = string
-  default     = "enterprise"
+  default     = "standard"
 }
 
 variable "cpu_node_type" {
@@ -70,6 +70,7 @@ variable "allowed_ips" {
 }
 
 variable "control_plane_acl_ips" {
-  description = "CIDR blocks allowed to reach the Kubernetes API control plane"
+  description = "CIDR blocks allowed to reach the Kubernetes API control plane (enterprise only)"
   type        = list(string)
+  default     = []
 }

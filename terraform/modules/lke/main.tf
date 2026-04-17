@@ -12,13 +12,16 @@ resource "linode_lke_cluster" "this" {
   region      = var.region
   tier        = var.tier
 
-  control_plane {
-    high_availability = true  # Required for LKE Enterprise
+  dynamic "control_plane" {
+    for_each = var.tier == "enterprise" ? [1] : []
+    content {
+      high_availability = true
 
-    acl {
-      enabled = true
-      addresses {
-        ipv4 = var.control_plane_acl_ips
+      acl {
+        enabled = true
+        addresses {
+          ipv4 = var.control_plane_acl_ips
+        }
       }
     }
   }

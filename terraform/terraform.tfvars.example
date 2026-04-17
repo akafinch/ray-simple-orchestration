@@ -16,17 +16,17 @@ allowed_ips        = [
   "172.238.57.42/32"
 ]
 
-# Kubernetes API access — LKE-E Control Plane ACL (kubectl operators only)
-control_plane_acl_ips = [
-  "24.115.103.113/32",
-  "70.170.50.50/32",
-  "170.203.114.78/32",
-  "193.43.135.45/32",
-  "172.238.57.42/32"
-]
+# LKE tier: "standard" (default) or "enterprise"
+# lke_tier           = "standard"
 
-# LKE tier: "enterprise" (VPC-only, auto-firewall) or "standard"
-# lke_tier           = "enterprise"
+# Kubernetes API access — only needed for LKE Enterprise
+# control_plane_acl_ips = [
+#   "24.115.103.113/32",
+#   "70.170.50.50/32",
+#   "170.203.114.78/32",
+#   "193.43.135.45/32",
+#   "172.238.57.42/32"
+# ]
 
 # Optional overrides:
 # cluster_label      = "clip-clap-inference"
