@@ -36,11 +36,16 @@ async def grafana_proxy(path: str, request: Request) -> Response:
     if request.url.query:
         url = f"{url}?{request.url.query}"
 
+    # Build headers, forwarding host info for Grafana's root_url resolution
+    proxy_headers = {k: v for k, v in request.headers.items() if k.lower() not in ("host",)}
+    proxy_headers["X-Forwarded-Host"] = request.headers.get("host", "")
+    proxy_headers["X-Forwarded-Proto"] = request.url.scheme or "https"
+
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.request(
             method=request.method,
             url=url,
-            headers={k: v for k, v in request.headers.items() if k.lower() != "host"},
+            headers=proxy_headers,
             content=await request.body(),
         )
 
